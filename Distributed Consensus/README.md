@@ -1,0 +1,1 @@
+Implemented a fault-tolerant key-value store which stores same copy of key-value pairs in multiple servers and uses Paxos to achieve concensus between servers.
