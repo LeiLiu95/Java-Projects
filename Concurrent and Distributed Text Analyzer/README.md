@@ -1,0 +1,1 @@
+Implemented a text analyzer using Hadoop that concurrently process large scale data (Big Data) on distributed systems.
