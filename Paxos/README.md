@@ -1,0 +1,1 @@
+Implemented a Paxos class that is my implementation of the Paxos Algorithm.
