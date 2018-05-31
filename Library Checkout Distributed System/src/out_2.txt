@@ -1,0 +1,24 @@
+Your request has been approved, 6 Mike "The Letter"
+Your request has been approved, 7 Jack "The Letter"
+Your request has been approved, 8 Lucy "Divergent"
+Request Failed - Book not available
+Request Failed - We do not have this book
+Your request has been approved, 9 Ty "The Great Gatsby"
+6 "The Letter"
+4 "Divergent"
+8 "Divergent"
+5 "The Great Gatsby"
+9 "The Great Gatsby"
+1 not found, no such borrow record
+6 "The Letter"
+4 "Divergent"
+3 not found, no such borrow record
+6 "The Letter"
+4 "Divergent"
+5 "The Great Gatsby"
+9 "The Great Gatsby"
+No record found for Bob
+"The Letter" 2
+"The Great Gatsby" 13
+"Divergent" 0
+"The Count of Monte Cristo" 17

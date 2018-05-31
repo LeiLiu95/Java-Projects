@@ -1,0 +1,19 @@
+setmode U
+borrow Mike "The Letter"
+borrow Jack "The Letter"
+borrow Lucy "Divergent"
+borrow Mike "Divergent"
+borrow Mike "Hi"
+borrow Ty "The Great Gatsby"
+list Mike
+list Lucy
+list Ty
+return 1
+list Mike
+return 3
+list Mike
+List Mike
+list Ty
+list Bob
+inventory
+exit
