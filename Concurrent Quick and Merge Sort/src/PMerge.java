@@ -55,26 +55,6 @@ public class PMerge extends RecursiveAction{
 		else if(A.length < numThreads && B.length < numThreads) {
 			//check if any more threads are allowed
 			if(currentThreads < numThreads) {
-//				int midA = A.length/2;
-//				int midB = B.length/2;
-//				int[] A1 = Arrays.copyOfRange(A, 0, midA);
-//				int[] A2 = Arrays.copyOfRange(A, midA, A.length);
-//				
-//				int[] B1 = Arrays.copyOfRange(B, 0, midB);
-//				int[] B2 = Arrays.copyOfRange(B, midB, B.length);
-//				int[] C1 = new int[A1.length + B1.length];
-//				int[] C2 = new int[A2.length + B2.length];
-//				this.currentThreads+=1;
-//				PMerge thread1 = new PMerge(A1, B1, C, currentThreads);
-//				this.currentThreads-=1;
-//				
-//				this.currentThreads+=1;
-//				PMerge thread2 = new PMerge(A2, B2, C, currentThreads);
-//				this.currentThreads-=1;
-//				invokeAll(thread1, thread2);
-//				thread1.join();
-				
-				//use this to watch for threads
 				
 				//keep track of thread count
 				this.currentThreads+=1;
@@ -88,10 +68,6 @@ public class PMerge extends RecursiveAction{
 				thread1.fork();
 				thread2.compute();
 				thread1.join();
-				//mergeParts(thread1, thread2, C);
-//				thread1.fork();
-//				thread2.compute();
-//				thread1.join();
 				Arrays.sort(C, 0, C.length);
 			}
 		}
