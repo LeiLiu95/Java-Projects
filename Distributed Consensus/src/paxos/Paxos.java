@@ -48,27 +48,18 @@ public class Paxos implements PaxosRMI, Runnable{
     
     //class that is used for agreement instances
     class PaxosInstanceAgreement{
-    	//shared value id
     	int uniqueId = 0;
-    	//set the last accepted id to be -1
     	int lastAcceptReqId = -1;
-    	//learner variabled that shows if the instance is decided or not
     	boolean decided = false;
-    	//acceptor variables that is needed 
 
-    	//initialize the last value to be null
     	Object lastAcceptValue = null;
-    	//variable for proposer that is initialized as null
     	Object valueObject = null;
     	
-    	//constructors for agreement instance class
-    	//empty constructor method
     	PaxosInstanceAgreement(){
     	}
     	
     	//constructor with a passed object
     	PaxosInstanceAgreement (Object value){
-    		//set the object to the passed parameter
     		this.valueObject = value;
     	}	
     }
@@ -92,19 +83,12 @@ public class Paxos implements PaxosRMI, Runnable{
 //        values = new HashMap<Integer , Object>();
 //        accpState = new HashMap<Integer, StateP>();
         doneSeqs = new int[peers.length];
-        //iterate through the new array and set all indexes to -1
         for (int i=0; i<doneSeqs.length; i+=1) {
-        	//set the value in doneseq to -1
         	doneSeqs[i] = -1;
         }
-        //create a new thread pool
         threadPool = Executors.newWorkStealingPool();
-        //initialize a new deque
         seqDeque = new ConcurrentLinkedDeque<>();
-        //create a new mape and deque using the creation calls
         instanceMap = new ConcurrentSkipListMap<Integer, PaxosInstanceAgreement> ();
-        
-        // register peers, do not modify this part
         try{
             System.setProperty("java.rmi.server.hostname", this.peers[this.me]);
             registry = LocateRegistry.createRegistry(this.ports[this.me]);
@@ -171,71 +155,39 @@ public class Paxos implements PaxosRMI, Runnable{
     public void Start(int seq, Object value){
         // Your code here
     	
-    	//add the seq to the deque
         seqDeque.add(seq);
-        //create an object in the map for the value
         instanceMap.put (seq, new PaxosInstanceAgreement (value));
-        //run the thread
         threadPool.execute(new Thread(this));    	
-        
-//    	//Paxos px = new Paxos(seq, value, value);
-//    	//if seq is less then the minimum then exit
-//    	if (seq < this.Min()) {
-//    		return;
-//    	}
-//    	//else lock and update the maximum seen value
-//    	this.mutex.lock();
-//    	this.updateMaxSeqSeen(seq);
-//    	this.mutex.unlock();
-//    	//this.propose(seq, value);
-//    	//propose the seq and value
-//    	this.propose(seq, value);
     }
     
     //function to check majority of threads
     boolean getMajorityValue (String callerType, Request requestValue, PaxosCaller[] callerList, Thread[] threadList, PaxosInstanceAgreement agreementInstance){
-    	//create a servicee for the thread pool
     	ExecutorService callerPool = Executors.newWorkStealingPool();
-    	//iterate through the lists to create new caller and thread for each
     	for (int i=0; i<peers.length; i+=1){
-    		//create new call with the caller type, request and index
     		callerList[i] = new PaxosCaller (callerType, requestValue, i);
-    		//create a new thread with the index in the caller list
     		threadList[i] = new Thread (callerList[i]);
-    		//run the thread in the pool
     		callerPool.execute(callerList[i]);
     	}
-    	//number of accepted
     	int numberAccepted = 0;
-    	//shut down the thread pool
     	callerPool.shutdown();
     	
     	try{
-    		//wait for thread
     		callerPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     	}catch (Exception e){
-    		//catch any errors
     		e.printStackTrace();
     	}
-    	//iterate through caller list to check if anything was accepted
     	for (int i=0; i<peers.length; i+=1){
-    		//if it is empty then skip
     		if (callerList[i].responseValue == null) {
     			continue;
     		}
-    		//if it is accepted then increment the number of accepted
     		else if (callerList[i].responseValue.acceptBool) {
     			numberAccepted+=1;
     		}
-    		//otherwise set the id to the new response id
     		else {
-    			//set the unique id of instance
     			agreementInstance.uniqueId = callerList[i].responseValue.myUniqueId;
     		}
     	}
-    	//return if the numbers of accepted threads is greater than halfs
     	boolean check;
-    	//set check value and return
     	check = numberAccepted > peers.length / 2;
     	return check;
     }
@@ -243,34 +195,24 @@ public class Paxos implements PaxosRMI, Runnable{
     
     //function to create and set and isntance in the map
     public PaxosInstanceAgreement createResponse(int seq) {
-    	//create a new instance
     	PaxosInstanceAgreement instanceResponse = new PaxosInstanceAgreement();
-    	//put the instance into the map
     	instanceMap.put(seq, instanceResponse);
-    	//return the instance to the caller
     	return instanceResponse;
     }
     
     //function to forget old data from algorithm
     private void removeOldInstances(){
-    	//create a min value to hold the minimal value from function call
     	int min = Min();
-    	//iterate through until all keys less than min is removed
     	while (instanceMap.firstKey() < min){
-    		//if key is larger than min then remove
     		instanceMap.remove(instanceMap.firstKey());
     	}
     }
     
     //caller class for thread and implements the runnable interface
     class PaxosCaller implements Runnable{
-    	//variable to hold the id of server
     	int serverIdCaller;
-    	//string for the kind of caller
     	String callerType;
-    	//request and response variables
     	Request requestValue;
-    	//set the response value to null
     	Response responseValue = null;
     	
     	//empty constructor
@@ -278,36 +220,25 @@ public class Paxos implements PaxosRMI, Runnable{
     	}
     	//constructor method for paxos caller
     	PaxosCaller (String callerType, Request requestValue, int serverId){
-    		//set the caller, request and server for caller object
     		this.serverIdCaller = serverId;
-    		//set the caller type of class
     		this.callerType = callerType;
-    		//set the request value of class type
     		this.requestValue = requestValue;
     	}
     	
     	//run function for the caller class
     	public void run (){
-    		//if the serverId is equal to itself
         	if (serverIdCaller == me){
-        		//if the caller type is accept then
         		if (callerType == "Accept") {
-        			//if it is accept call accept function
         			responseValue = Accept(requestValue);
         		}
-        		//if it is in prepare, accept or done
         		else if(callerType == "Prepare") {
-        			//passed the value to prepare
         			responseValue = Prepare(requestValue);
         		}
         		else {
-        			//if it is decide then send it to decide function
         			responseValue = Decide(requestValue);
         		}
         	}
-        	//if it is not equal to itself then use the call function
         	else {
-        		//set the response as the return from call function
         		responseValue = Call(callerType, requestValue, serverIdCaller);
         	}
         }
@@ -315,24 +246,15 @@ public class Paxos implements PaxosRMI, Runnable{
     
     @Override
     public void run(){
-    	//set the seq value from the deque
         int seqValue = seqDeque.pollFirst();
-        //set the context of the seq in the instance map
         PaxosInstanceAgreement instanceVar = instanceMap.get (seqValue);
-        //iterate through until instance is decided or dead
         while (!isDead() && !instanceVar.decided){
-        	//create a variable for the next required id
         	int requiredUniqueID;
-        	//findd the required id from the function
         	requiredUniqueID = (instanceVar.uniqueId / peers.length + 1) * peers.length + me;
-        	//prep the proposal requrest
         	Request proposalRequest;
-        	//set request to a new request with the seq value
         	proposalRequest = new Request(seqValue, requiredUniqueID);
 
-        	//track proposals with two arrays of the size of peers
         	Thread callThreadsList[] = new Thread[peers.length];
-        	//caller list of paxos
         	PaxosCaller callerList[] = new PaxosCaller[peers.length];       	
 
         	//if there is no majority then skip over this iteration
@@ -340,43 +262,31 @@ public class Paxos implements PaxosRMI, Runnable{
         		continue;
         	}
 
-        	//check old values of accepted Match the value of any old accepted proposals.
         	int maxAcceptRequiredUniqueID = -1;
         	//iterate through the callers list
         	for (PaxosCaller paxosCallerI : callerList){
-        		//if the response of the call is null or not accepted then pass iteration
         		if (paxosCallerI.responseValue == null || !paxosCallerI.responseValue.acceptBool) {
         			continue;
         		}
         		//check and set most recent accepted proposals of callers
         		if (paxosCallerI.responseValue.lastAcceptedId > maxAcceptRequiredUniqueID){
-        			//if max is less than previous unique then set the instance variable to the last caller value
         			instanceVar.valueObject = paxosCallerI.responseValue.objectValue;
-        			//set the max id to the last id
         			maxAcceptRequiredUniqueID = paxosCallerI.responseValue.lastAcceptedId;
         		}
 
-        		//set the done seq array index to the current caller done
             	doneSeqs[paxosCallerI.responseValue.meIndex] = paxosCallerI.responseValue.doneValue;
-            	//remove old data
             	removeOldInstances();
         	}
         	
-        	//create and send accept requests
         	Request acceptRequest;
-        	//create a new request
         	acceptRequest = new Request (seqValue, requiredUniqueID, instanceVar.valueObject);
-        	//if there is not a majority then pass iteration
         	if (!getMajorityValue ("Accept", acceptRequest, callerList, callThreadsList, instanceVar)) {
         		continue;
         	}
-        	//create and send decide request
         	Request decideRequest;
         	decideRequest= new Request (seqValue, instanceVar.valueObject, me, doneSeqs[me]);
-        	//check majority
         	getMajorityValue("Decide", decideRequest, callerList, callThreadsList, instanceVar);
         }
-        //if status is dead then close the pool
         if (isDead()) {
         	threadPool.shutdownNow();
         }
@@ -384,83 +294,46 @@ public class Paxos implements PaxosRMI, Runnable{
     
     // RMI handler
     public Response Prepare(Request req){
-        // your code here
-    	//instance variable used to hold the value from the map
         PaxosInstanceAgreement instanceResponse;
-        //grab the instance at the index of the seq of passed req
         instanceResponse = instanceMap.get (req.seqNum);
-        //if the instance is null then create one
         if (instanceResponse == null){
-        	//create an instance and set it in the map
         	instanceResponse = createResponse(req.seqNum);
-//        	instanceResponse = new AgreementInstance();
-//        	instanceMap.put(req.seq, instanceResponse);
         }
-        //create a boolean to see if the request is accepted
         boolean isAccepted;
-        //set the boolean value
         isAccepted = (req.uniqueId > instanceResponse.uniqueId);
-        //if the instance is accepted then change the unique id
         if (isAccepted) {
-        	//set unique id of the response
           instanceResponse.uniqueId = req.uniqueId;
         }
-        //then return a new response with the following variables
         Response returnResponse = new Response(req.seqNum, isAccepted, instanceResponse.uniqueId, instanceResponse.lastAcceptReqId, instanceResponse.lastAcceptValue, me, doneSeqs[me]);
         return returnResponse;
     }
 
     public Response Accept(Request req){
-        // your code here
-    	//instance variable used to hold the value from the map
         PaxosInstanceAgreement instanceResponse;
         instanceResponse = instanceMap.get (req.seqNum);
-        //if the instance is null then create a new instance
         if (instanceResponse == null){
-        	//create a new instance and set it iin the map
         	instanceResponse = createResponse(req.seqNum);
-//        	instanceResponse = new AgreementInstance();
-//        	instanceMap.put(req.seq, instanceResponse);
         }
-        //create boolean value for if the instance is accepted
         boolean isAccepted;
-        //set the boolean variable
         isAccepted = (req.uniqueId >= instanceResponse.uniqueId);
-        //if the instance is accepted then change the values
         if (isAccepted){
-        	//set the instance unique id to the request id
         	instanceResponse.uniqueId = req.uniqueId;
-        	//set the id to the request id
         	instanceResponse.lastAcceptReqId = req.uniqueId;
-        	//set the last accepted value to the pass value
         	instanceResponse.lastAcceptValue = req.objectValue;
         }
-        //create a new response with the parameters and return it
         Response returnResponse = new Response(req.seqNum, isAccepted, instanceResponse.uniqueId,me, doneSeqs[me]);
-        //return the constructed response
         return returnResponse;
     }
 
     public Response Decide(Request req){
-        // your code here
-    	//instance variable used to hold the value from the map
     	PaxosInstanceAgreement instanceResponse;
-    	//set the isntance response variable
     	instanceResponse = instanceMap.get (req.seqNum);
-    	//if the instance is null then create a new instance
         if (instanceResponse == null){
-        	//call response method and create it
         	instanceResponse = createResponse(req.seqNum);
-//        	instanceResponse = new AgreementInstance();
-//        	instanceMap.put(req.seq, instanceResponse);
         }
-        //set the instance decided value to true
         instanceResponse.decided = true;
-        //set the valueobject variable to the value pass
         instanceResponse.valueObject = req.objectValue;
-        //set the doneseqs index to the request done value
         doneSeqs[req.meIndex] = req.doneValue;
-        //return a new response
         return new Response();
     }
 
@@ -488,7 +361,6 @@ public class Paxos implements PaxosRMI, Runnable{
     	if (instanceMap.isEmpty()) {
     		return -1;
     	}
-    	//else return the last key in the map
   	    return instanceMap.lastKey();
     }
 
@@ -521,18 +393,12 @@ public class Paxos implements PaxosRMI, Runnable{
      * instances.
      */
     public int Min(){
-        // Your code here
-    	//create a min variable and set it to the maximum number
     	int min = Integer.MAX_VALUE;
-    	//itereate through the doneseqs
         for (int i = 0; i<doneSeqs.length; i+=1){
-        	//if the value in the array index is less than the minimum value 
         	if (doneSeqs[i] < min) {
-        		//then change the min value of the loop
         		min = doneSeqs[i];
         	}
         }
-        //return the minimal number from doneseqs + 1
         return min + 1;
     }
     
@@ -544,37 +410,22 @@ public class Paxos implements PaxosRMI, Runnable{
      * it should not contact other Paxos peers.
      */
     public retStatus Status(int seq){
-        // Your code here
-    	//if the seq is less than the min then
     	if (seq < Min()){
-    		//return new retstatus with null
     		retStatus temp = new retStatus(State.Forgotten, null);
     		return temp;
         }
-    	//create instance to hold value from map
         PaxosInstanceAgreement instanceResponse;
-        //set the instance respoonse variable
         instanceResponse = instanceMap.get(seq);
-        //if the instance is null then create a new instance
         if (instanceResponse == null){
-        	//set the instance by calling the create response method
         	instanceResponse = createResponse(seq);      	
-//        	instanceResponse = new AgreementInstance();
-//        	instanceMap.put(seq, instanceResponse);
         }
-        //create a state variable 
         State state;
-        //if the instance is decided then set the decided state
         if (instanceResponse.decided) {
-        	//set state to decided
         	state = State.Decided;
         }
-        //else set the state to pending
         else {
-        	//set state to pending
         	state = State.Pending;
         }
-        //create a new status with the state and return
         retStatus returnValue = new retStatus(state, instanceResponse.valueObject);
         return returnValue;
     }

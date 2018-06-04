@@ -14,19 +14,13 @@ public class BookServer {
     tcpPort = 7000;
     udpPort = 8000;
 
-    // parse the inventory file
     Library inventory = new Library(fileName);
     // TODO: handle request from clients
     try {
-    	//create a udp thread with the library and proper udp port
     	Thread udpThread = new UDPThread(inventory, udpPort);
-    	//start the thread
     	udpThread.start();
-    	//create a server socket for tcp server
     	ServerSocket tcpServer = new ServerSocket(tcpPort);
-    	//create a socket for tcp server
     	Socket tcpSocket;
-    	//iterate through to check tcp thread
     	while((tcpSocket = tcpServer.accept()) != null) {
     		Thread tcpThread = new TCPThread(inventory, tcpSocket);
     		tcpThread.start();

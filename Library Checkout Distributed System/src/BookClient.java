@@ -81,136 +81,84 @@ public class BookClient {
     }
   }
   
-  //added variables
   
-  //ports needed for connections
   private int udpPort;
-  //tcp port variable
   private int tcpPort;
-  //string to determine the type of connection, udp or tcp
   private String portType;
-  //variable to hold the host
   private String hostName;
-  //address of the host
   private InetAddress hostIP;
-  //byte array for buffer data
   private byte[] buffer;
-  //byte array for the data to be received
   private byte[] receiveBuffer;
-  //datagram packet to send udp
   private DatagramPacket senderUDP;
-  //datagram packet to receive data for udp
   private DatagramPacket receiverUDP;
-  //datagram socket for udp
   private DatagramSocket udpSocket;
-  //socket to be used for tcp
   private Socket tcpSocket;
-  //scanner for data input
   private Scanner dataIn;
-  //printstream for print line
   private PrintStream printOut;
-  //printstream used for outputting to textfile
   private PrintStream textFile;
   
   public BookClient(String hostName, int tcpPort, int udpPort, int clientID) throws IOException {
-	  //set the proper hostname and host address
 	  this.hostName = hostName;
-	  //set the ip address to the proper inet address
 	  this.hostIP = InetAddress.getByName(hostName);
-	  //set the ports to the proper port number
 	  this.udpPort = udpPort;
-	  //set tcp port to passed tcp port
 	  this.tcpPort = tcpPort;
 	  
-	  //set the buffer size to one byte
 	  this.receiveBuffer = new byte [1024];
-	  //set default to UDP
 	  this.portType = UDP;
-	  //set sockets for tcp and udp
 	  this.tcpSocket = new Socket(this.hostName, this.tcpPort);
 	  this.udpSocket = new DatagramSocket();
-	  //initialize scanner to the proper socket input
 	  this.dataIn = new Scanner(tcpSocket.getInputStream());
-	  //set a printstream to output
 	  this.printOut = new PrintStream(tcpSocket.getOutputStream());
-	  //create a printstream to the output file
 	  this.textFile = new PrintStream(new File("out_"+ clientID + ".txt"));
   }
   
   public void setMode(String connectionType) {
-	  //if input is U then set it to UDP
 	  if(connectionType.equals("U")) {
-		  //set port to udp default
 		  this.portType = UDP;
 	  }
-	  //if input is T then set to TCP
 	  else if(connectionType.equals("T")) {
-		  //set port to tcp default
 		  this.portType = TCP;
 	  }
-	  //System.out.println("Using " + connectionType + " connection.");
   }
   
   public void sendCommand(String command) throws IOException{
-	  //set buffer values
 	  buffer = new byte[command.length()];
 	  buffer = command.getBytes();
-	  //create string variable to hold output to print
 	  String outputString = "";
-	  //sed the command through udp if connection mode is udp
 	  if(portType.equals(UDP)) {
-		  //set the send udp to a new packet with the buffer and size
 		  senderUDP = new DatagramPacket(buffer, buffer.length, hostIP, udpPort);
-		  //send the udp data through the socket
 		  udpSocket.send(senderUDP);
-		  //set up the receive udp
 		  receiverUDP = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-		  //set the udp socket to the receive value
 		  udpSocket.receive(receiverUDP);
-		  //set the output string to the returned data
 		  outputString = new String(receiverUDP.getData(), 0, receiverUDP.getLength());
 		  
-		  //testing writing output
 		  if(outputString.equals("")) {
 			  textFile.write((outputString).getBytes());
 		  }
-		//ese write the result to textfile
 		  else {
 			  textFile.write((outputString+"\n").getBytes());
 		  }
 		  
-		  //System.out.println(outputString);
 	  }
-	  //else check if the connection type is TCP
 	  else if (portType.equals(TCP)) {
-		  
-		  //if it is tcp then print out the command
 		  printOut.println(command);
-		  //call the flush method
 		  printOut.flush();
-		  //iterate through to check if there are any commands left
 		  while(dataIn.hasNextLine()) {
-			  //set the outupt string to the next line from input
 			  outputString = dataIn.nextLine();
-			  //if it is done then exit
 			  if(outputString.equals("finish")) {
 				  break;
 			  }
-			  //ese write the result to textfile
 			  if(outputString.equals("")) {
 				  textFile.write((outputString).getBytes());
 			  }
 			  else {
 				  textFile.write((outputString+"\n").getBytes());
 			  }
-			  //textFile.write((outputString+"\n").getBytes());
-			  //System.out.println(outputString);
 		  }
 	  }
   }
   
   public void close() {
-	  //close all sockets when done
 	  textFile.close();
 	  try {
 		  tcpSocket.close();
@@ -218,7 +166,6 @@ public class BookClient {
 	  catch(IOException e) {
 		  e.printStackTrace();
 	  }
-	  //close udp socket
 	  udpSocket.close();
   }
 }

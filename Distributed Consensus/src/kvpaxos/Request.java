@@ -8,19 +8,14 @@ import java.io.Serializable;
  */
 public class Request implements Serializable {
     static final long serialVersionUID=11L;
-    // Your data here
-    //create an op for reqeust
     Op operation;
 
-    // Your constructor and methods here
     //empty constructor
-    public Request() {
-    	
+    public Request() {	
     }
     
     //constructor for the request class
     public Request (Op operationRequest){
-    	//set the operation of the request class to the passed operation
     	this.operation = operationRequest;
     }
 }

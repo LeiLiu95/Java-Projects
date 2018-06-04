@@ -7,11 +7,7 @@ import java.io.Serializable;
  */
 public class Response implements Serializable {
     static final long serialVersionUID=22L;
-    // your data here
-    //integer used to hold the value for response class
     int intValue;
-
-    // Your constructor and methods here
     
     //constructor for the response claass that holds the index
     Response(int responseVariable){

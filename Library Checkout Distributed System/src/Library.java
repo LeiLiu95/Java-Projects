@@ -27,8 +27,6 @@ public class Library {
 			this.recordID = new int[quantity];
 			for(int i = 0; i<quantity; i+=1) {
 				this.recordID[i] = 0;
-				//this.recordID[i] = recordID;
-				//recordID+=1;
 			}
 		}
 	}
@@ -45,9 +43,7 @@ public class Library {
 			String line;
 			while(fileReader.hasNextLine()) {
 				line = fileReader.nextLine();
-//				if(line.split(" ").length != 2) {
-//					break;
-//				}
+
 				String[] input = line.split(" ");
 				String name = "";
 				for(int i = 0; i<input.length-1; i+=1) {
@@ -61,26 +57,11 @@ public class Library {
 				int quantity = Integer.parseInt(input[input.length-1]);
 				Book tempBook = new Book(name, quantity);
 				library.add(tempBook);
-				//recordID+=quantity;
 			}
-			//testing to see what books are made and names
-//			for(int i =0; i<library.size();i+=1) {
-//				System.out.println(library.get(i).bookName);
-//				for(int j=0; j<library.get(i).studentName.length; j+=1) {
-//					System.out.println(library.get(i).recordID[j]);
-//				}
-//			}
 		}
 		catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
-
-		
-		//testing remove after
-//		for(int i = 0; i<library.size(); i+=1) {
-//			System.out.println(library.get(i).bookName);
-//			System.out.println(library.get(i).num);
-//		}
 	}
 	
 	public String getCommand(String command) {
@@ -96,13 +77,10 @@ public class Library {
 						book += " " +tokens[i];
 					}
 				}
-				//return borrow(tokens[1], tokens[2]);
-				//System.out.println(book);
 				return borrow(tokens[1], book);
 			case "return": return bookReturn(tokens[1]);
 			case "inventory": return inventory();
 			case "list": 
-				//System.out.println(tokens[1]);
 				return list(tokens[1]);
 			case "exit": return exit();
 		}
@@ -133,15 +111,12 @@ public class Library {
 	
 	private synchronized String bookReturn(String bookID) {
 		int id = Integer.parseInt(bookID);
-//		System.out.println("bookret recID " + recordID);
-//		System.out.println("id ret " +id);
 		if(id>=recordID) {
 			return id + " not found, no such borrow record";
 		}
 		for(int i = 0; i<library.size(); i+=1) {
 			for(int j = 0; j<library.get(i).available.length; j+=1) {
 				if(library.get(i).recordID[j] == id && library.get(i).available[j]==false) {
-					//added for new record id
 					library.get(i).recordID[j]=0;
 					
 					library.get(i).num+=1;
@@ -170,13 +145,8 @@ public class Library {
 	
 	private synchronized String list(String student) {
 		String books = "";
-		//System.out.println(library.size());
 		for(int i = 0; i<library.size(); i+=1) {
-//			System.out.println("i " + i);
 			for(int j = 0; j<library.get(i).studentName.length; j+=1){
-//				System.out.println("j " + j);
-//				System.out.println(student);
-//				System.out.println(library.get(i).studentName[j]);
 				if(student.equals(library.get(i).studentName[j])) {
 					if(books.equals("")) {
 						books += library.get(i).recordID[j] + " " + library.get(i).bookName;
